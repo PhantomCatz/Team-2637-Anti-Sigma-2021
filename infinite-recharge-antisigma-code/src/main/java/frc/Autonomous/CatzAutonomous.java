@@ -59,7 +59,7 @@ public class CatzAutonomous
     public double distanceGoal;
     public double distanceMoved;
     public final double STOP_THRESHOLD_DIST = 1;
-    public final double SLOW_THRESHOLD_DIST = 30;
+    public final double SLOW_THRESHOLD_DIST = 51; //make larger(orig 30in)
 
     public final double ENCODER_COUNTS_PER_INCH_LT = 1014.5; //without weight: 1046.6
     public final double ENCODER_COUNTS_PER_INCH_RT = 964;    //without weight: 1025.7
@@ -70,12 +70,15 @@ public class CatzAutonomous
     public final int DRIVE_STRAIGHT_TIMEOUT = 30;
     public boolean inDriveStraight = false;
 
-    public final int MAX_VELOCITY_LIMIT = 3000;
-    public final double VELOCITY_DECREASE_RATE = 0.98;
+    public final int MIN_VELOCITY_LIMIT = 3000;
+    public final double VELOCITY_DECREASE_RATE = 0.79; // make this smallerorig 0.92
 
-    public final double DISTANCE_CHANGER = 1.06;
 
     public double targetVelocity = 0.0;
+
+    public  double maxSpeedFPS = 0.0;
+
+    public final double FPS_TO_CNTS_PER_100MS = (12.0/1.0) * 1.0/Robot.driveTrain.encCountsToInches*(1.0/10.0);
 
     	/***************************************************************************
 	 * PID Turn Constants
@@ -182,9 +185,7 @@ public class CatzAutonomous
     ************************************************************************/
     public double convertVelocity(double ftPerSec) 
     {
-        double inPerSec = ftPerSec * (12/1); 
-        double cntsPerSec = inPerSec * 1/Robot.driveTrain.encCountsToInches; 
-        double cntsPer100Ms = cntsPerSec * 1/10;
+        double cntsPer100Ms = ftPerSec * FPS_TO_CNTS_PER_100MS; 
         return cntsPer100Ms;
     }
 
@@ -192,16 +193,16 @@ public class CatzAutonomous
 
     /*
      *Distance: input distance in inches that the robot has to go
-     *maxSpeed: input speed in encoder counts per 100ms
+     *maxSpeed: input speed in ft/sec
      *timeout:  input timeout time in 
      */
 
     public void driveStraight(double distance, double maxSpeed, double timeout)
     {
-        
+        maxSpeedFPS = maxSpeed;
         rightInitialEncoderCnt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);
 
-        distanceGoal = DISTANCE_CHANGER * Math.abs(distance); //in inches
+        distanceGoal = Math.abs(distance); 
 
         if (distance < 0)
         {
@@ -212,10 +213,9 @@ public class CatzAutonomous
             targetVelocity = convertVelocity(maxSpeed);
         }
 
-        driveStraightLogConfig();
-        //Robot.driveTrain.drvTrainMtrCtrlLTBack.set(targetVelocity);
+        //driveStraightLogConfig();
         
-        Robot.driveTrain.setTargetVelocity(targetVelocity);//targetVelocity);
+        Robot.driveTrain.setTargetVelocity(targetVelocity);
 
         monitorEncoderPosition(rightInitialEncoderCnt, timeout);
     }
@@ -230,16 +230,24 @@ public class CatzAutonomous
 
         boolean completed = false;
         boolean done      = false;
-        double distanceRemaining;
+        double distanceRemaining = 0.0;
         double currentVelocityRt  = 0.0;
         double currentVelocityLt  = 0.0;
         double deltaCounts;
         double currentTime = 0.0;
         double halfWay = distanceGoal * 0.5;
-        //Robot.dataCollection.printInitialData();
+        
         Robot.dataCollection.isFirst = true;
+
+        double decelDist =  SLOW_THRESHOLD_DIST;
+        if(decelDist > halfWay)
+        {
+            decelDist = halfWay;
+        }
+
        while(done == false)
        {
+           System.out.println("NavX:   " + Robot.navx.getAngle());
             currentEncCountRt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);//for left and right
             currentEncCountLt = Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getSelectedSensorPosition(0);
             currentVelocityRt = Robot.driveTrain.getIntegratedEncVelocity("RT"); //for left and right
@@ -261,11 +269,11 @@ public class CatzAutonomous
             }
             else 
             {
-                if (distanceRemaining < SLOW_THRESHOLD_DIST && distanceRemaining < halfWay) //TBD 
+                if (distanceRemaining < decelDist)
                 {
 
                     
-                    if(targetVelocity > MAX_VELOCITY_LIMIT)
+                    if(targetVelocity > MIN_VELOCITY_LIMIT)
                     { 
                         targetVelocity = targetVelocity * VELOCITY_DECREASE_RATE;
                         Robot.driveTrain.setTargetVelocity(targetVelocity);
@@ -283,13 +291,13 @@ public class CatzAutonomous
             }
             if (Robot.dataCollection.isFirst == true)
             {
-                //Robot.dataCollection.printInitialData();
-                data = new CatzLog(Robot.driveTrain.PID_P,Robot.driveTrain.PID_I,Robot.driveTrain.PID_D,
-                            Robot.driveTrain.PID_F,Robot.driveTrain.PID_IZ,Robot.driveTrain.encCountsToInches,
-                            Robot.driveTrain.currentDrvTrainGear,distanceGoal,
-                            Robot.driveTrain.DRV_TRAIN_RT_CHANGE,
-                            -999.0,-999.0,-999.0,-999.0,-999.0,-999.0,-999.0);
-                Robot.dataCollection.logData.add(data);
+                data = new CatzLog(distanceGoal,maxSpeedFPS, decelDist,VELOCITY_DECREASE_RATE, MIN_VELOCITY_LIMIT,
+                            SLOW_THRESHOLD_DIST, 
+                            Robot.driveTrain.LT_PID_P,Robot.driveTrain.LT_PID_I,
+                            Robot.driveTrain.LT_PID_D,Robot.driveTrain.LT_PID_F,Robot.driveTrain.encCountsToInches,
+                            Robot.driveTrain.currentDrvTrainGear,
+                            Robot.driveTrain.DRIVE_STRAIGHT_PID_TUNING_CONSTANT, Robot.pdp.getVoltage(),
+                            Robot.driveTrain.RT_PID_P,Robot.driveTrain.RT_PID_F);
                 Robot.dataCollection.isFirst = false;
             }
             else 
@@ -299,31 +307,18 @@ public class CatzAutonomous
                                                                 currentEncCountRt, currentVelocityLt, Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getClosedLoopError(0), 
                                                                 currentEncCountLt, distanceRemaining, Robot.navx.getAngle(),
                                                                 -999.0, -999.0, -999.0, -999.0,-999.0, -999.0);
-                Robot.dataCollection.logData.add(data);
-                Robot.dataCollectionTimer.delay(0.03);
+                
             }
-           
-                /*
-                System.out.println(currentTime + "," +
-                               targetVelocity + "," +
-                               currentVelocity + "," +
-                               Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getClosedLoopError(0) + "," +
-                               currentEncCount + "," +
-                               distanceRemaining );  */
-                               
-             
+            Robot.dataCollection.logData.add(data);
+            Robot.dataCollectionTimer.delay(0.03);
+               
  
        }
         
 
         return completed;
 
-        //SmartDashboard.putNumber("Encoder Position", currentEncCount);
-        //SmartDashboard.putNumber("Initial Encoder Distance", leftInitialEncoderCnt);
-        //SmartDashboard.putNumber("Distance Moved", distanceMoved);
-        //SmartDashboard.putNumber("Delta Encoder", (currentEncCount - leftInitialEncoderCnt));
-        //SmartDashboard.putNumber("Distance To Goal", distanceRemaining);
-        //SmartDashboard.putNumber("total time", totalTime);
+    
     }
 
 
@@ -656,18 +651,17 @@ public class CatzAutonomous
         Robot.dataCollection.logData.add(data);
     }
 
-    public void driveStraightLogConfig()
+    /*public void driveStraightLogConfig()
     {
         System.out.println("T0: " + Robot.driveTrain.PID_P + "," 
                                   + Robot.driveTrain.PID_I + "," 
                                   + Robot.driveTrain.PID_D + "," 
-                                  + Robot.driveTrain.PID_F + "," 
-                                  + Robot.driveTrain.PID_IZ + "," 
+                                  + Robot.driveTrain.PID_F + ","  
                                   + Robot.driveTrain.encCountsToInches + "," 
                                   + Robot.driveTrain.currentDrvTrainGear + "," 
                                   + distanceGoal + ","
                                   + STOP_THRESHOLD_DIST
         );
         
-    }
+    }*/
 }

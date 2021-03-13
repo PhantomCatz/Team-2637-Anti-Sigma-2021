@@ -44,8 +44,8 @@ public class CatzDriveTrain
 
     
     //private final double GEAR_RATIO    = 11/44;  TBD - OK TO LEAVE AS COMMENT IF DATA IS CORRECT
-    private final double LOW_GEAR_RATIO  = 857/50;
-    private final double HIGH_GEAR_RATIO = 25/3;
+    private final double LOW_GEAR_RATIO  = 857.0/50.0;
+    private final double HIGH_GEAR_RATIO = 25.0/3.0;
 
     
 
@@ -83,15 +83,19 @@ public class CatzDriveTrain
     private final int DRVTRAIN_VELOCITY_PID_IDX = 0;
     private final int PID_TIMEOUT_MS      = 10;
 
-    private final double DRIVE_STRAIGHT_PID_TUNING_CONSTANT = 0.98;
+    public final double DRIVE_STRAIGHT_PID_TUNING_CONSTANT = 1.0;
 
 
 
-    public final double PID_P = 0.05;   // original value was 0.05
-    public final double PID_I = 0.0001; // original value was 0.0005
-    public final double PID_D = 0.1;      // original value was 0.1
-    public final double PID_F = 0.02;   // original value was 0.005    0.02 value for target speed 16000
-    public final int PID_IZ = 10;
+    public final double RT_PID_P = 0.05;  
+    public final double RT_PID_I = 0.0; 
+    public final double RT_PID_D = 0.0;    
+    public final double RT_PID_F = 1023.0/20666.0; 
+
+    public final double LT_PID_P = 0.1;  
+    public final double LT_PID_I = 0.0; 
+    public final double LT_PID_D = 0.0;    
+    public final double LT_PID_F = 1023.0/20666.0; 
 
     public final double DRV_TRAIN_RT_CHANGE = 1.015;
 
@@ -150,17 +154,17 @@ public class CatzDriveTrain
          drvTrainMtrCtrlRTFrnt.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor, DRVTRAIN_VELOCITY_PID_IDX, PID_TIMEOUT_MS);
 
          //Configure PID Gain Constants
-         drvTrainMtrCtrlLTFrnt.config_kP(DRVTRAIN_VELOCITY_PID_IDX, PID_P);
-         drvTrainMtrCtrlLTFrnt.config_kI(DRVTRAIN_VELOCITY_PID_IDX, PID_I);
-         drvTrainMtrCtrlLTFrnt.config_kD(DRVTRAIN_VELOCITY_PID_IDX, PID_D);
-         drvTrainMtrCtrlLTFrnt.config_kF(DRVTRAIN_VELOCITY_PID_IDX, PID_F);
-         drvTrainMtrCtrlLTFrnt.config_IntegralZone(DRVTRAIN_VELOCITY_PID_IDX, PID_IZ);
+         drvTrainMtrCtrlLTFrnt.config_kP(DRVTRAIN_VELOCITY_PID_IDX, LT_PID_P);
+         drvTrainMtrCtrlLTFrnt.config_kI(DRVTRAIN_VELOCITY_PID_IDX, LT_PID_I);
+         drvTrainMtrCtrlLTFrnt.config_kD(DRVTRAIN_VELOCITY_PID_IDX, LT_PID_D);
+         drvTrainMtrCtrlLTFrnt.config_kF(DRVTRAIN_VELOCITY_PID_IDX, LT_PID_F);
+         //drvTrainMtrCtrlLTFrnt.config_IntegralZone(DRVTRAIN_VELOCITY_PID_IDX);
 
-         drvTrainMtrCtrlRTFrnt.config_kP(DRVTRAIN_VELOCITY_PID_IDX, PID_P);
-         drvTrainMtrCtrlRTFrnt.config_kI(DRVTRAIN_VELOCITY_PID_IDX, PID_I);
-         drvTrainMtrCtrlRTFrnt.config_kD(DRVTRAIN_VELOCITY_PID_IDX, PID_D);
-         drvTrainMtrCtrlRTFrnt.config_kF(DRVTRAIN_VELOCITY_PID_IDX, PID_F);
-         drvTrainMtrCtrlRTFrnt.config_IntegralZone(DRVTRAIN_VELOCITY_PID_IDX, PID_IZ); 
+         drvTrainMtrCtrlRTFrnt.config_kP(DRVTRAIN_VELOCITY_PID_IDX, RT_PID_P);
+         drvTrainMtrCtrlRTFrnt.config_kI(DRVTRAIN_VELOCITY_PID_IDX, RT_PID_I);
+         drvTrainMtrCtrlRTFrnt.config_kD(DRVTRAIN_VELOCITY_PID_IDX, RT_PID_D);
+         drvTrainMtrCtrlRTFrnt.config_kF(DRVTRAIN_VELOCITY_PID_IDX, RT_PID_F);
+         //drvTrainMtrCtrlRTFrnt.config_IntegralZone(DRVTRAIN_VELOCITY_PID_IDX, PID_IZ); 
     }
 
     public void arcadeDrive(double power, double rotation)
@@ -258,8 +262,9 @@ public class CatzDriveTrain
     public void setTargetVelocity(double targetVelocity)
     {
 
+        double rightSetValue = -targetVelocity * DRIVE_STRAIGHT_PID_TUNING_CONSTANT;
         drvTrainMtrCtrlLTFrnt.set(TalonFXControlMode.Velocity, targetVelocity);
-        drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.Velocity, -DRIVE_STRAIGHT_PID_TUNING_CONSTANT*targetVelocity*DRV_TRAIN_RT_CHANGE);
+        drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.Velocity, rightSetValue);
         
     }
 

@@ -110,11 +110,11 @@ public class DataCollection
     public void printInitialData()
     {
         CatzLog data;
-        double data1  =          Robot.driveTrain.PID_P;
-        double data2  =          Robot.driveTrain.PID_I;
-        double data3  =          Robot.driveTrain.PID_D;
-        double data4  =          Robot.driveTrain.PID_F;
-        double data5  =          Robot.driveTrain.PID_IZ;
+        double data1  =          -999.0;//Robot.driveTrain.PID_P;
+        double data2  =           -999.0;//Robot.driveTrain.PID_I;
+        double data3  =           -999.0;//Robot.driveTrain.PID_D;
+        double data4  =           -999.0;//Robot.driveTrain.PID_F;
+        double data5  =          -999.0;
         double data6  =          Robot.driveTrain.encCountsToInches;
         double data7  =          Robot.driveTrain.currentDrvTrainGear;
         double data8  =          Robot.auton.distanceGoal;
@@ -180,11 +180,11 @@ public class DataCollection
 
             case LOG_ID_DRV_STRAIGHT_PID:
                 
-                data1  =          Robot.driveTrain.PID_P;
-                data2  =          Robot.driveTrain.PID_I;
-                data3  =          Robot.driveTrain.PID_D;
-                data4  =          Robot.driveTrain.PID_F;
-                data5  =          Robot.driveTrain.PID_IZ;
+                data1  =           -999.0;//Robot.driveTrain.PID_P;
+                data2  =           -999.0;//Robot.driveTrain.PID_I;
+                data3  =           -999.0;//Robot.driveTrain.PID_D;
+                data4  =           -999.0;//Robot.driveTrain.PID_F;
+                data5  =          -999.0;
                 data6  =          Robot.driveTrain.encCountsToInches;
                 data7  =          Robot.driveTrain.currentDrvTrainGear;
                 data8  =          Robot.auton.distanceGoal;
