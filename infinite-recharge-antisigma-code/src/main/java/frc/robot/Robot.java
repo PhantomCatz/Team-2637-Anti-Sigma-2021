@@ -303,14 +303,6 @@ public class Robot extends TimedRobot
       intake.intakeRollerOff();
     }
 
-    if(xboxDrv.getXButton())
-    {
-      intake.changeMode(5);
-    }
-    else if(xboxDrv.getBButton())
-    {
-      intake.changeMode(0);
-    }
 
     //--------------------------------------------SHOOTER-------------------------------------------------
     if(xboxAux.getPOV() == DPAD_UP)
