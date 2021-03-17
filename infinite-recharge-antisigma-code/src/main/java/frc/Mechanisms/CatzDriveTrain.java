@@ -92,7 +92,7 @@ public class CatzDriveTrain
     public final double RT_PID_D = 0.0;    
     public final double RT_PID_F = 1023.0/20666.0; 
 
-    public final double LT_PID_P = 0.1;  
+    public final double LT_PID_P = 0.1;//orig 0.1;  
     public final double LT_PID_I = 0.0; 
     public final double LT_PID_D = 0.0;    
     public final double LT_PID_F = 1023.0/20666.0; 
