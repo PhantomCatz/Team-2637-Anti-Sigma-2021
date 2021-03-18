@@ -71,7 +71,7 @@ public class CatzAutonomous
     public boolean inDriveStraight = false;
 
     public final int MIN_VELOCITY_LIMIT = 3000;
-    public final double VELOCITY_DECREASE_RATE = 0.79; // make this smallerorig 0.92
+    public final double VELOCITY_DECREASE_RATE = 1.0;//0.77; // make this smallerorig 0.92
 
 
     public double targetVelocity = 0.0;
@@ -79,6 +79,8 @@ public class CatzAutonomous
     public  double maxSpeedFPS = 0.0;
 
     public final double FPS_TO_CNTS_PER_100MS = (12.0/1.0) * 1.0/Robot.driveTrain.encCountsToInches*(1.0/10.0);
+
+    
 
     	/***************************************************************************
 	 * PID Turn Constants
@@ -196,9 +198,10 @@ public class CatzAutonomous
      *maxSpeed: input speed in ft/sec
      *timeout:  input timeout time in 
      */
-
+    
     public void driveStraight(double distance, double maxSpeed, double timeout)
     {
+        System.out.println("in drv straight");
         maxSpeedFPS = maxSpeed;
         rightInitialEncoderCnt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);
 
@@ -247,6 +250,7 @@ public class CatzAutonomous
 
        while(done == false)
        {
+           System.out.println("monitor enc pos");
            System.out.println("NavX:   " + Robot.navx.getAngle());
             currentEncCountRt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);//for left and right
             currentEncCountLt = Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getSelectedSensorPosition(0);
@@ -258,7 +262,7 @@ public class CatzAutonomous
             
             distanceRemaining = distanceGoal - distanceMoved; //distance in inches (error)
 
-            
+            currentTime = driveStraightTimer.get();
             
             if (distanceRemaining < STOP_THRESHOLD_DIST)
             {
@@ -266,6 +270,7 @@ public class CatzAutonomous
                 Robot.driveTrain.setTargetVelocity(targetVelocity);
                 completed = true;
                 done = true;
+                
             }
             else 
             {
@@ -280,7 +285,7 @@ public class CatzAutonomous
                     }    
                     
                 }
-                currentTime = driveStraightTimer.get();
+                
                 if(currentTime > timeoutTime)
                 {
                     targetVelocity = 0.0;
@@ -314,7 +319,32 @@ public class CatzAutonomous
                
  
        }
-        
+       
+        while( Math.abs(currentVelocityRt) > 50  && Math.abs(currentVelocityLt) > 50)
+        {
+
+            currentEncCountRt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);//for left and right
+            currentEncCountLt = Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getSelectedSensorPosition(0);
+            currentVelocityRt = Robot.driveTrain.getIntegratedEncVelocity("RT"); //for left and right
+            currentVelocityLt = Robot.driveTrain.getIntegratedEncVelocity("LT");
+
+            currentTime = driveStraightTimer.get();
+
+            deltaCounts = currentEncCountRt - initialEncoderCount;
+            distanceMoved = Math.abs((double) (deltaCounts * Robot.driveTrain.encCountsToInches) );
+            
+            distanceRemaining = distanceGoal - distanceMoved; //distance in inches (error)
+
+            data = new CatzLog(currentTime, targetVelocity, currentVelocityRt,
+                                                                Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getClosedLoopError(0), 
+                                                                currentEncCountRt, currentVelocityLt, Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getClosedLoopError(0), 
+                                                                currentEncCountLt, distanceRemaining, Robot.navx.getAngle(),
+                                                                -999.0, -999.0, -999.0, -999.0,-999.0, -999.0);
+                
+            
+            Robot.dataCollection.logData.add(data);
+            Robot.dataCollectionTimer.delay(0.03);
+        }      
 
         return completed;
 

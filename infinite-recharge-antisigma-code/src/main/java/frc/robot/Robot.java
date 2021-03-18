@@ -49,7 +49,7 @@ public class Robot extends TimedRobot
   public static CatzShooter    shooter;
   public static CatzIndexer    indexer;
   public static CatzAutonomous auton;
-  public static CatzClimber    climber;
+ // public static CatzClimber    climber;
 
 
   public static DataCollection dataCollection;
@@ -89,10 +89,10 @@ public class Robot extends TimedRobot
 
   // Camera Settings
   
-  private UsbCamera camera;
+ /* private UsbCamera camera;
   private UsbCamera camera2;
 
-  private VideoSink server;
+  private VideoSink server;/*
 
   /*private static double cameraResolutionWidth = 320;
   private static double cameraResolutionHeight = 240;
@@ -107,7 +107,9 @@ public class Robot extends TimedRobot
     driveTrain = new CatzDriveTrain();
     intake     = new CatzIntake();
     auton      = new CatzAutonomous();   
-    climber    = new CatzClimber();  
+    //climber    = new CatzClimber();
+    indexer    = new CatzIndexer();  
+    shooter    = new CatzShooter();
 
     navx = new AHRS(Port.kMXP, (byte)200);
     navx.reset();
@@ -142,7 +144,7 @@ public class Robot extends TimedRobot
     SmartDashboard.putBoolean(CatzConstants.TEAM_SELECTORR, false);
   
     // Camera Configuration
-    camera = CameraServer.getInstance().startAutomaticCapture(0);
+    /*camera = CameraServer.getInstance().startAutomaticCapture(0);
     camera.setFPS(15);
     camera.setResolution(320, 240);
     camera.setPixelFormat(PixelFormat.kMJPEG);
@@ -152,12 +154,12 @@ public class Robot extends TimedRobot
     camera2.setResolution(320, 240);
     camera2.setPixelFormat(PixelFormat.kMJPEG);
 
-    server = CameraServer.getInstance().getServer();
+    server = CameraServer.getInstance().getServer();*/
 
-    /*intake.intakeControl();
+    //intake.intakeControl();
     indexer.startIndexerThread();
     shooter.setShooterVelocity();
-    climber.climbControl();*/
+    //climber.climbControl();
   }
 
   @Override
@@ -192,8 +194,8 @@ public class Robot extends TimedRobot
 		SmartDashboard.putBoolean(CatzConstants.POSITION_SELECTORM, prev_boxM);
 		SmartDashboard.putBoolean(CatzConstants.POSITION_SELECTORR, prev_boxR);
 
-    SmartDashboard.putBoolean("Deployed", intake.getDeployedLimitSwitchState());
-    SmartDashboard.putBoolean("Stowed",   intake.getStowedLimitSwitchState());
+    //SmartDashboard.putBoolean("Deployed", intake.getDeployedLimitSwitchState());
+    //SmartDashboard.putBoolean("Stowed",   intake.getStowedLimitSwitchState());
 
 
     //SmartDashboard.putNumer("deploy mtr ctrl", intake.getDeployMotorPower());
@@ -202,15 +204,26 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit() 
   {
+    intake.intakeRollerIn();
     driveTrain.shiftToHighGear();
-    auton.driveStraight(10, 10, 1000);
-    //auton.PIDturn(180, 3, 0.45);
-    dataCollection.dataCollectionInit(dataArrayList);
-    dataCollectionTimer.reset();
-    dataCollectionTimer.start();
-    dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_STRAIGHT);
+    auton.driveStraight(121, 10, 1000);
+    driveTrain.shiftToLowGear();
+    auton.PIDturn(-94.18491613, 3, 0.45);
+
+    driveTrain.shiftToHighGear();
+    auton.driveStraight(95, 10, 1000);
+    driveTrain.shiftToLowGear();
+    auton.PIDturn(71.56505118, 3, 0.45);
+
+    driveTrain.shiftToHighGear();
+    auton.driveStraight(150, 10, 1000);
+
+    //dataCollection.dataCollectionInit(dataArrayList);
+    //dataCollectionTimer.reset();
+    //dataCollectionTimer.start();
+    //dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_STRAIGHT);
     //dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_TURN);
-    dataCollection.startDataCollection();
+    //dataCollection.startDataCollection();
     
     //auton.run(0.5);
     
@@ -272,11 +285,11 @@ public class Robot extends TimedRobot
     }*/
 
     //-----------------------------------------------INTAKE---------------------------------------------------
-    if(xboxDrv.getStickButtonPressed(Hand.kLeft) && intake.getDeployedLimitSwitchState() == false)
+    if(xboxDrv.getStickButtonPressed(Hand.kLeft))
     {
-      intake.deployIntake();
+      intake.deployIntake(); //right is deploy
     }
-    else if(xboxDrv.getStickButtonPressed(Hand.kRight) && intake.getStowedLimitSwitchState() == false)
+    else if(xboxDrv.getStickButtonPressed(Hand.kRight))
     {
       intake.stowIntake();
     }
@@ -320,7 +333,7 @@ public class Robot extends TimedRobot
     }
     else if(xboxAux.getBButton())
     {
-      //indexer.setShooterIsRunning(true);
+      indexer.setShooterIsRunning(true);
       shooter.shoot();
     } 
     else if(xboxAux.getStartButton())
@@ -340,7 +353,7 @@ public class Robot extends TimedRobot
    }
 
   //--------------------------------------------------CLIMB----------------------------------------------
-   if(xboxAux.getYButton())
+   /*if(xboxAux.getYButton())
    {
      climber.climbRunWinchLO();
    }
