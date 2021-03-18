@@ -204,6 +204,7 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit() 
   {
+    driveTrain.setToBrakeMode();
     driveTrain.shiftToHighGear();
     auton.driveStraight(10, 10, 1000);
     //auton.PIDturn(180, 3, 0.45);
@@ -234,7 +235,7 @@ public class Robot extends TimedRobot
   {
 
     driveTrain.instantiateDifferentialDrive();
-
+    driveTrain.setToBrakeMode();
     dataCollection.dataCollectionInit(dataArrayList);
     dataCollectionTimer.reset();
     dataCollectionTimer.start();
