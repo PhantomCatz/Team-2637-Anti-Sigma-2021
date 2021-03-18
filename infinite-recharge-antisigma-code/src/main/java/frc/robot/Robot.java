@@ -204,15 +204,26 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit() 
   {
+    intake.intakeRollerIn();
     driveTrain.shiftToHighGear();
-    auton.driveStraight(10, 10, 1000);
-    //auton.PIDturn(180, 3, 0.45);
-    dataCollection.dataCollectionInit(dataArrayList);
-    dataCollectionTimer.reset();
-    dataCollectionTimer.start();
-    dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_STRAIGHT);
+    auton.driveStraight(121, 10, 1000);
+    driveTrain.shiftToLowGear();
+    auton.PIDturn(-94.18491613, 3, 0.45);
+
+    driveTrain.shiftToHighGear();
+    auton.driveStraight(95, 10, 1000);
+    driveTrain.shiftToLowGear();
+    auton.PIDturn(71.56505118, 3, 0.45);
+
+    driveTrain.shiftToHighGear();
+    auton.driveStraight(150, 10, 1000);
+
+    //dataCollection.dataCollectionInit(dataArrayList);
+    //dataCollectionTimer.reset();
+    //dataCollectionTimer.start();
+    //dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_STRAIGHT);
     //dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_TURN);
-    dataCollection.startDataCollection();
+    //dataCollection.startDataCollection();
     
     //auton.run(0.5);
     
