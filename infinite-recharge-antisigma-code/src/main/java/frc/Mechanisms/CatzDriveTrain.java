@@ -306,5 +306,14 @@ public class CatzDriveTrain
     public void setTargetPower(double targetPower) {
         drvTrainMtrCtrlLTFrnt.set(TalonFXControlMode.PercentOutput, (targetPower));
         drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.PercentOutput, (targetPower));  
-	}
+    }
+    
+    public void setToBrakeMode()
+    {
+        //Set MC's in brake mode
+        drvTrainMtrCtrlLTFrnt.setNeutralMode(NeutralMode.Brake); 
+        drvTrainMtrCtrlLTBack.setNeutralMode(NeutralMode.Brake);
+        drvTrainMtrCtrlRTFrnt.setNeutralMode(NeutralMode.Brake);
+        drvTrainMtrCtrlRTBack.setNeutralMode(NeutralMode.Brake);
+    }
 }
