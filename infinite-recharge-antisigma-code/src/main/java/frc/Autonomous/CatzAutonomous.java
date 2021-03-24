@@ -92,10 +92,10 @@ public class CatzAutonomous
     public final double MIN_FPS_VELOCITY = 5.0;
 
     public final double VELOCITY_DECREASE_RATE_8 = 0.955;
-    public final double VELOCITY_DECREASE_RATE_10 = 0.90;
-    public final double VELOCITY_DECREASE_RATE_12 = 0.88;
-    public final double VELOCITY_DECREASE_RATE_13 = 0.87;
-    public final double VELOCITY_DECREASE_RATE_14 = 0.865;
+    public final double VELOCITY_DECREASE_RATE_10 = 0.93;
+    public final double VELOCITY_DECREASE_RATE_12 = 0.915;
+    public final double VELOCITY_DECREASE_RATE_13 = 0.91;
+    public final double VELOCITY_DECREASE_RATE_14 = 0.9;
     
 
     public double velDecrRate = 1.0;
@@ -104,10 +104,10 @@ public class CatzAutonomous
     public double decelDist;
 
     public final double MIN_DIST_TO_TARGET_8 = 25.2;
-    public final double MIN_DIST_TO_TARGET_10 = 19.2;
-    public final double MIN_DIST_TO_TARGET_12 = 21.6;
-    public final double MIN_DIST_TO_TARGET_13 = 22.8;
-    public final double MIN_DIST_TO_TARGET_14 = 24;
+    public final double MIN_DIST_TO_TARGET_10 = 28.8;
+    public final double MIN_DIST_TO_TARGET_12 = 32.4;
+    public final double MIN_DIST_TO_TARGET_13 = 34.2;
+    public final double MIN_DIST_TO_TARGET_14 = 36.0;
     	/***************************************************************************
 	 * PID Turn Constants
 	 ***************************************************************************/
