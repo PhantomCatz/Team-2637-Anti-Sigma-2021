@@ -212,9 +212,9 @@ public class Robot extends TimedRobot
     if(pathA)
     {
       intake.deployIntake();
-      driveTrain.shiftToHighGear();
+      
       auton.driveStraight(100, 1000);
-      intake.intakePowerCell();
+      //intake.intakePowerCell();
       
       /*if(indexer.ballCount == 1)
       {

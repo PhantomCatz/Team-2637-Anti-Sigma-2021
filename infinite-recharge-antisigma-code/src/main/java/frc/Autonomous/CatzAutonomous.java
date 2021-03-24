@@ -78,7 +78,7 @@ public class CatzAutonomous
 
     public double targetVelocity = 0.0;
 
-    public  double maxSpeedFPS = 0.0;
+    
 
     public final double FPS_TO_CNTS_PER_100MS = (12.0/1.0) * 1.0/Robot.driveTrain.encCountsToInches*(1.0/10.0);
 
@@ -87,7 +87,7 @@ public class CatzAutonomous
      * 
     */
 
-    double maxSpeed = 0.0;
+    double maxSpeedFPS = 0.0;
 
     public final double MIN_FPS_VELOCITY = 5.0;
 
@@ -103,11 +103,11 @@ public class CatzAutonomous
 
     public double decelDist;
 
-    public final double MIN_DIST_TO_TARGET_8 = 25.2;
-    public final double MIN_DIST_TO_TARGET_10 = 28.8;
-    public final double MIN_DIST_TO_TARGET_12 = 32.4;
-    public final double MIN_DIST_TO_TARGET_13 = 34.2;
-    public final double MIN_DIST_TO_TARGET_14 = 36.0;
+    public final double MIN_DIST_TO_TARGET_8 = 25.2 + 10.0;
+    public final double MIN_DIST_TO_TARGET_10 = 28.8 + 10.0;
+    public final double MIN_DIST_TO_TARGET_12 = 32.4 + 10.0;
+    public final double MIN_DIST_TO_TARGET_13 = 34.2 + 10.0;
+    public final double MIN_DIST_TO_TARGET_14 = 36.0 + 10.0;
     	/***************************************************************************
 	 * PID Turn Constants
 	 ***************************************************************************/
@@ -219,36 +219,36 @@ public class CatzAutonomous
 
     public void setDriveParam(double distance)
     {
-        distanceGoal = distance - 8;
+        distanceGoal = distance;// - 8;//where intake roller should be
         if(distanceGoal > 0 && distanceGoal <= 70)
         {
             velDecrRate = VELOCITY_DECREASE_RATE_8;
             decelDist = MIN_DIST_TO_TARGET_8;
-            maxSpeed = 8.0;
+            maxSpeedFPS = 8.0;
         }
         else if(distanceGoal > 70 && distanceGoal <= 95)
         {
             velDecrRate = VELOCITY_DECREASE_RATE_10;
             decelDist = MIN_DIST_TO_TARGET_10;
-            maxSpeed = 10.0;
+            maxSpeedFPS = 10.0;
         }
         else if(distanceGoal > 95 && distanceGoal <= 120)
         {
             velDecrRate = VELOCITY_DECREASE_RATE_12;
             decelDist = MIN_DIST_TO_TARGET_12;
-            maxSpeed = 12.0;
+            maxSpeedFPS = 12.0;
         }
         else if(distanceGoal > 120 && distanceGoal <= 150)
         {
             velDecrRate = VELOCITY_DECREASE_RATE_13;
             decelDist = MIN_DIST_TO_TARGET_13;
-            maxSpeed = 13.0;
+            maxSpeedFPS = 13.0;
         }
         else if(distanceGoal > 150 && distanceGoal <= 180)
         {
             velDecrRate = VELOCITY_DECREASE_RATE_14;
             decelDist = MIN_DIST_TO_TARGET_14;
-            maxSpeed = 14.0;
+            maxSpeedFPS = 14.0;
         }
     }
 
@@ -279,16 +279,16 @@ public class CatzAutonomous
 
     /*
      *Distance: input distance in inches that the robot has to go
-     *maxSpeed: input speed in ft/sec
+     *maxSpeedFPS: input speed in ft/sec
      *timeout:  input timeout time in 
      */
     
     public void driveStraight(double distance, double timeout)
     {
-        
+        Robot.driveTrain.shiftToHighGear();   
         setDriveParam(distance);
         System.out.println("in drv straight");
-        maxSpeedFPS = maxSpeed;
+        
         rightInitialEncoderCnt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);
 
         
@@ -296,11 +296,11 @@ public class CatzAutonomous
 
         if (distance < 0)
         {
-            targetVelocity = -convertVelocity(maxSpeed);//cnts/100ms
+            targetVelocity = -convertVelocity(maxSpeedFPS);//cnts/100ms
         }
         else    
         {
-            targetVelocity = convertVelocity(maxSpeed);
+            targetVelocity = convertVelocity(maxSpeedFPS);
         }
 
         //driveStraightLogConfig();
@@ -326,24 +326,19 @@ public class CatzAutonomous
         double currentVelocityLt  = 0.0;
         double deltaCounts;
         double currentTime = 0.0;
-        //double halfWay = distanceGoal * 0.5;
         
         Robot.dataCollection.isFirst = true;
 
-        
-        /*if(decelDist > halfWay)
-        {
-            decelDist = halfWay;
-        }*/
-        
+       
        while(done == false)
        {
            System.out.println("monitor enc pos");
            System.out.println("NavX:   " + Robot.navx.getAngle());
             currentEncCountRt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);//for left and right
             currentEncCountLt = Robot.driveTrain.drvTrainMtrCtrlLTFrnt.getSelectedSensorPosition(0);
-            currentVelocityRt = Robot.driveTrain.getIntegratedEncVelocity("RT"); //for left and right
             currentVelocityLt = Robot.driveTrain.getIntegratedEncVelocity("LT");
+            currentVelocityRt = Robot.driveTrain.getIntegratedEncVelocity("RT"); //for left and right
+           
 
             deltaCounts = currentEncCountRt - initialEncoderCount;
             distanceMoved = Math.abs((double) (deltaCounts * Robot.driveTrain.encCountsToInches) );
@@ -354,7 +349,7 @@ public class CatzAutonomous
             
             if (distanceRemaining < STOP_THRESHOLD_DIST)
             {
-                targetVelocity = CONVERTED_MIN_VELOCITY_LIMIT;
+                targetVelocity = 0.0; //CONVERTED_MIN_VELOCITY_LIMIT;
                 Robot.driveTrain.setTargetVelocity(targetVelocity);
                 completed = true;
                 done = true;
@@ -412,7 +407,7 @@ public class CatzAutonomous
                
  
        }
-       
+       Robot.intake.intakeRollerOff();
         /*while( Math.abs(currentVelocityRt) > 50  && Math.abs(currentVelocityLt) > 50)
         {
 
@@ -444,10 +439,10 @@ public class CatzAutonomous
     
     }
 
-    public void driveStraightIntake(double distance, double maxSpeed, double timeout)
+    public void driveStraightIntake(double distance, double maxSpeedFPS, double timeout)
     {
         System.out.println("in drv straight");
-        maxSpeedFPS = maxSpeed;
+        
         rightInitialEncoderCnt = Robot.driveTrain.drvTrainMtrCtrlRTFrnt.getSelectedSensorPosition(0);
         
         
@@ -456,11 +451,11 @@ public class CatzAutonomous
 
         if (distance < 0)
         {
-            targetVelocity = -convertVelocity(maxSpeed);//cnts/100ms
+            targetVelocity = -convertVelocity(maxSpeedFPS);//cnts/100ms
         }
         else    
         {
-            targetVelocity = convertVelocity(maxSpeed);
+            targetVelocity = convertVelocity(maxSpeedFPS);
         }
 
         //driveStraightLogConfig();
