@@ -157,6 +157,7 @@ public class Robot extends TimedRobot
     server = CameraServer.getInstance().getServer();*/
 
     //intake.intakeControl();
+    //intake.deployIntake();
     indexer.startIndexerThread();
     shooter.setShooterVelocity();
     //climber.climbControl();
@@ -204,8 +205,44 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit() 
   {
-    driveTrain.shiftToHighGear();
-    auton.driveStraight(10, 10, 1000);
+    //driveTrain.shiftToHighGear();
+    //auton.driveStraightIntake(10, 14, 1000); //change dist
+    
+    boolean pathA = true;
+    if(pathA)
+    {
+      intake.deployIntake();
+      driveTrain.shiftToHighGear();
+      auton.driveStraight(100, 1000);
+      intake.intakePowerCell();
+      
+      /*if(indexer.ballCount == 1)
+      {
+        auton.drivePathAPurple();
+      }
+      else
+      {
+        auton.drivePathAYellow();
+      }*/
+    }
+    /*
+    else if(pathA == false)
+    {
+      driveTrain.shiftToHighGear();
+      auton.driveStraight(10, 10, 1000);
+      intake.intakePowerCell();
+      if(indexer.ballCount == 1)
+      {
+        auton.drivePathBPurple();
+      }
+      else
+      {
+        auton.drivePathBYellow();
+      }
+    }*/
+    
+
+
     //auton.PIDturn(180, 3, 0.45);
     dataCollection.dataCollectionInit(dataArrayList);
     dataCollectionTimer.reset();

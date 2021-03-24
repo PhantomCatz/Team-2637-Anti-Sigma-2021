@@ -4,14 +4,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator.Validity;
 import com.revrobotics.CANDigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-//import com.revrobotics.CANSparkMax;
-//import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
-//import com.revrobotics.CANSparkMax.IdleMode;
-//import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-//import edu.wpi.first.wpilibj.DigitalInput;  //Currently using SparkMax Data Port
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
@@ -38,17 +34,11 @@ public class CatzIntake {
     final double DEPLOY_REDUCE_POWER_TIME_OUT_SEC = 0.400;
     final double STOW_REDUCE_POWER_TIME_OUT_SEC = 0.350;
 
-    private final int INTAKE_MODE_NULL = 0;
-    private final int INTAKE_MODE_DEPLOY_START = 1;
-    private final int INTAKE_MODE_DEPLOY_REDUCE_POWER = 2;
-    private final int INTAKE_MODE_STOW_START = 3;
-    private final int INTAKE_MODE_STOW_REDUCE_POWER = 4;
-    private final int INTAKE_MODE_MANUAL_CONTROL = 5;
 
     private WPI_VictorSPX intakeFigure8MtrCtrl;
     public WPI_TalonSRX intakeRollerMtrCtrl; // changed to public because dataport is being used on drivetrain?
 
-    private DoubleSolenoid intakeDeployMtrCtrl;
+    private DoubleSolenoid intakeDeploySolenoid;
 
     private CANDigitalInput intakeDeployedLimitSwitch;
     private CANDigitalInput intakeStowedLimitSwitch;
@@ -59,35 +49,33 @@ public class CatzIntake {
 
     private Thread intakeThread;
 
-    private int intakeMode = INTAKE_MODE_NULL;
-
     boolean intakeDeployed = false;
 
     public CatzIntake() {
         intakeFigure8MtrCtrl = new WPI_VictorSPX(INTAKE_FIGURE_8_MC_CAN_ID);
         intakeRollerMtrCtrl = new WPI_TalonSRX(INTAKE_ROLLER_MC_CAN_ID);
-        intakeDeployMtrCtrl = new DoubleSolenoid(INTAKE_DEPLOY_DS_A_ID, INTAKE_DEPLOY_DS_B_ID);
+        intakeDeploySolenoid = new DoubleSolenoid(INTAKE_DEPLOY_DS_A_ID, INTAKE_DEPLOY_DS_B_ID);
 
-        // intakeDeployMtrCtrl = new CANSparkMax (INTAKE_DEPLOY_MC_CAN_ID,
+        // intakeDeploySolenoid = new CANSparkMax (INTAKE_DEPLOY_MC_CAN_ID,
         // MotorType.kBrushless);
 
         // intakeDeployedLimitSwitch =
-        // intakeDeployMtrCtrl.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+        // intakeDeploySolenoid.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
         // intakeStowedLimitSwitch =
-        // intakeDeployMtrCtrl.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
+        // intakeDeploySolenoid.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyOpen);
 
         // Reset configuration
         intakeFigure8MtrCtrl.configFactoryDefault();
         intakeRollerMtrCtrl.configFactoryDefault();
 
-        // intakeDeployMtrCtrl.restoreFactoryDefaults();
+        // intakeDeploySolenoid.restoreFactoryDefaults();
 
         // Set roller MC to coast intakeMode
         intakeFigure8MtrCtrl.setNeutralMode(NeutralMode.Coast);
         intakeRollerMtrCtrl.setNeutralMode(NeutralMode.Coast);
 
         // Set deploy MC to brake intakeMode
-        // intakeDeployMtrCtrl.setIdleMode(IdleMode.kBrake);
+        // intakeDeploySolenoid.setIdleMode(IdleMode.kBrake);
 
         deployPowerCountLimit = (int) Math.round((DEPLOY_REDUCE_POWER_TIME_OUT_SEC / INTAKE_THREAD_WAITING_TIME) + 0.5);
         stowPowerCountLimit = (int) Math.round((STOW_REDUCE_POWER_TIME_OUT_SEC / INTAKE_THREAD_WAITING_TIME) + 0.5);
@@ -112,102 +100,34 @@ public class CatzIntake {
     }
 
     // ---------------------------------------------DEPLOY/STOW---------------------------------------------
-    public void intakeControl() {
-        intakeThread = new Thread(() -> {
-            double shootTime;
 
-            while (true) {
-                shootTime = Robot.dataCollectionTimer.get();
-                switch (intakeMode) {
-                case INTAKE_MODE_DEPLOY_START:
-                    intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kForward);
-                    intakeMode = INTAKE_MODE_DEPLOY_REDUCE_POWER;
-
-                    timeCounter++;
-                    break;
-
-                case INTAKE_MODE_DEPLOY_REDUCE_POWER:
-                    if (timeCounter > deployPowerCountLimit) {
-                        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kOff);
-                        intakeMode = INTAKE_MODE_NULL;
-                        intakeDeployed = true;
-                    }
-                    timeCounter++;
-                    break;
-
-                case INTAKE_MODE_STOW_START:
-                    intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kReverse);
-                    intakeMode = INTAKE_MODE_STOW_REDUCE_POWER;
-
-                    timeCounter++;
-                    break;
-
-                case INTAKE_MODE_STOW_REDUCE_POWER:
-                    if (timeCounter > stowPowerCountLimit) {
-                        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kOff);
-                        // intakeMode = INTAKE_MODE_NULL;
-                        intakeDeployed = false;
-                    }
-                    timeCounter++;
-                    break;
-
-                case INTAKE_MODE_MANUAL_CONTROL:
-                    if (Robot.xboxAux.getBumper(Hand.kLeft)) {
-                        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kForward);
-                    } else if (Robot.xboxAux.getBumper(Hand.kRight)) {
-                        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kReverse);
-                    } else {
-                        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kOff);
-                    }
-                    break;
-
-                default:
-                    intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kOff);
-                    break;
-                }
-                Timer.delay(INTAKE_THREAD_WAITING_TIME); // put at end
-            }
-        });
-        intakeThread.start();
-    }
-
-    public void changeMode(int mode) {
-        intakeMode = mode;
-    }
-
-    public int getMode() {
-        return intakeMode;
-    }
 
     public void deployIntake() {
-        timeCounter = 0;
-        intakeMode = INTAKE_MODE_DEPLOY_START;
-        // intakeDeployMtrCtrl.set(0.25);
+        intakeDeploySolenoid.set(Value.kForward);
+        //Timer.delay(1);
+        //intakeDeploySolenoid.set(Value.kOff);
     }
 
     public void stowIntake() {
-        timeCounter = 0;
-        intakeMode = INTAKE_MODE_STOW_START;
-        // intakeDeployMtrCtrl.set(-0.25);
-    }
-
-    public void stopDeploying() {
-        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kOff);
+        intakeDeploySolenoid.set(Value.kReverse);
+        //Timer.delay(1);
+        //intakeDeploySolenoid.set(Value.kOff);
     }
 
     public void applyBallCompression() {
-        intakeDeployMtrCtrl.set(DoubleSolenoid.Value.kForward);
+        intakeDeploySolenoid.set(DoubleSolenoid.Value.kForward);
         /*
-         * if(intakeDeployed == true) { intakeDeployMtrCtrl.set(COMPRESSION_POWER); }
+         * if(intakeDeployed == true) { intakeDeploySolenoid.set(COMPRESSION_POWER); }
          */
     }
 
     public Value getDeployMotorPower()
     {
-        return intakeDeployMtrCtrl.get();
+        return intakeDeploySolenoid.get();
     }
 
     // ---------------------------------------------Intake Limit Switches---------------------------------------------   
+    /*
     public boolean getDeployedLimitSwitchState()
     {
         return intakeDeployedLimitSwitch.get();
@@ -215,5 +135,17 @@ public class CatzIntake {
     public boolean getStowedLimitSwitchState()
     {
         return intakeStowedLimitSwitch.get();
+    }*/
+
+    //---------------------------------------------Autonomous pickup---------------------------------------------------
+
+    public void intakePowerCell()
+    {
+        Robot.auton.driveStraightIntake(14, Robot.auton.MIN_FPS_VELOCITY, 500);
+        if(Robot.indexer.ballPresent())
+        {
+            intakeRollerOff();
+        }
+        
     }
 }
