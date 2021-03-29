@@ -166,7 +166,7 @@ public class CatzShooter
         shooterPower   = SHOOTER_OFF_POWER;
         shtrMtrCtrlA.set(shooterPower);
         Robot.indexer.setShooterIsRunning(false);
-        Robot.xboxAux.setRumble(RumbleType.kLeftRumble, 0);
+        Robot.xboxDrv.setRumble(RumbleType.kLeftRumble, 0);
     
     }
 
@@ -305,7 +305,7 @@ public class CatzShooter
                         {
                             if(rumbleSet == false)
                             {
-                                Robot.xboxAux.setRumble(RumbleType.kLeftRumble, 1);
+                                Robot.xboxDrv.setRumble(RumbleType.kLeftRumble, 1);
                                 rumbleSet = true;
                             } 
                         }

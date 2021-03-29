@@ -58,11 +58,9 @@ public class Robot extends TimedRobot
   public static AHRS navx;
 
   // Xbox Controllers
-  private static XboxController xboxDrv;
-  public  static XboxController xboxAux;
+  public static XboxController xboxDrv;
 
   private final int XBOX_DRV_PORT = 0;
-  private final int XBOX_AUX_PORT = 1;
 
   public static PowerDistributionPanel pdp;
 
@@ -102,7 +100,6 @@ public class Robot extends TimedRobot
   public void robotInit() 
   {
     xboxDrv = new XboxController(XBOX_DRV_PORT);
-    xboxAux = new XboxController(XBOX_AUX_PORT);
 
     driveTrain = new CatzDriveTrain();
     intake     = new CatzIntake();
@@ -308,32 +305,32 @@ public class Robot extends TimedRobot
 
 
     //--------------------------------------------SHOOTER-------------------------------------------------
-    if(xboxAux.getPOV() == DPAD_UP)
+    if(xboxDrv.getPOV() == DPAD_UP)
     {
       shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_LO);
       //shooter.setTargetVelocity(.25);
     }
-    else if(xboxAux.getPOV() == DPAD_LT)
+    else if(xboxDrv.getPOV() == DPAD_LT)
     {
      shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_MD);
     }
-    else if(xboxAux.getPOV() == DPAD_DN)
+    else if(xboxDrv.getPOV() == DPAD_DN)
     {
       shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_HI);
     }
-    else if(xboxAux.getBButton())
+    else if(xboxDrv.getBButton())
     {
       indexer.setShooterIsRunning(true);
       shooter.shoot();
     } 
-    else if(xboxAux.getStartButton())
+    else if(xboxDrv.getStartButton())
     {
       shooter.shooterOff();
       indexer.indexerStop();
     }
 
    //----------------------------------------------INDEXER----------------------------------------
-   if(xboxAux.getBackButton())
+   if(xboxDrv.getBackButton())
    {
     indexer.indexerReversedOn();
    } 
