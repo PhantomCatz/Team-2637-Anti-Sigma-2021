@@ -102,16 +102,19 @@ public class CatzIntake {
     // ---------------------------------------------DEPLOY/STOW---------------------------------------------
 
 
-    public void deployIntake() {
+    public void deployIntake() 
+    {
         intakeDeploySolenoid.set(Value.kForward);
-        Timer.delay(1);
-        intakeDeploySolenoid.set(Value.kOff);
+        //Timer.delay(1);
+        //intakeDeploySolenoid.set(Value.kOff);
+
     }
 
-    public void stowIntake() {
+    public void stowIntake() 
+    {
         intakeDeploySolenoid.set(Value.kReverse);
-        Timer.delay(1);
-        intakeDeploySolenoid.set(Value.kOff);
+        //Timer.delay(1);
+        //intakeDeploySolenoid.set(Value.kOff);
     }
 
     public void applyBallCompression() {
@@ -127,6 +130,7 @@ public class CatzIntake {
     }
 
     // ---------------------------------------------Intake Limit Switches---------------------------------------------   
+    /*
     public boolean getDeployedLimitSwitchState()
     {
         return intakeDeployedLimitSwitch.get();
@@ -134,5 +138,17 @@ public class CatzIntake {
     public boolean getStowedLimitSwitchState()
     {
         return intakeStowedLimitSwitch.get();
+    }*/
+
+    //---------------------------------------------Autonomous pickup---------------------------------------------------
+
+    public void intakePowerCell()
+    {
+        Robot.auton.driveStraightIntake(14, Robot.auton.MIN_FPS_VELOCITY, 500);
+        if(Robot.indexer.ballPresent())
+        {
+            intakeRollerOff();
+        }
+        
     }
 }
