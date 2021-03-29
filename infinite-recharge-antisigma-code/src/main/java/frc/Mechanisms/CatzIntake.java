@@ -102,13 +102,16 @@ public class CatzIntake {
     // ---------------------------------------------DEPLOY/STOW---------------------------------------------
 
 
-    public void deployIntake() {
+    public void deployIntake() 
+    {
         intakeDeploySolenoid.set(Value.kForward);
         //Timer.delay(1);
         //intakeDeploySolenoid.set(Value.kOff);
+
     }
 
-    public void stowIntake() {
+    public void stowIntake() 
+    {
         intakeDeploySolenoid.set(Value.kReverse);
         //Timer.delay(1);
         //intakeDeploySolenoid.set(Value.kOff);
