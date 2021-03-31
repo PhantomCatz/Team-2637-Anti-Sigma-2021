@@ -17,8 +17,8 @@ import frc.robot.Robot;
 public class CatzIntake {
     private final int INTAKE_FIGURE_8_MC_CAN_ID = 10;
     private final int INTAKE_ROLLER_MC_CAN_ID = 11;
-    private final int INTAKE_DEPLOY_DS_A_ID = 5;
-    private final int INTAKE_DEPLOY_DS_B_ID = 6;
+    private final int INTAKE_DEPLOY_DS_A_ID = 6;
+    private final int INTAKE_DEPLOY_DS_B_ID = 5;
 
     private final double MTR_POWER_FIGURE8 = -0.9;
     private final double MTR_POWER_ROLLER = 0.6;
@@ -102,16 +102,13 @@ public class CatzIntake {
     // ---------------------------------------------DEPLOY/STOW---------------------------------------------
 
 
-    public void deployIntake() 
-    {
+    public void deployIntake() {
         intakeDeploySolenoid.set(Value.kForward);
         //Timer.delay(1);
         //intakeDeploySolenoid.set(Value.kOff);
-
     }
 
-    public void stowIntake() 
-    {
+    public void stowIntake() {
         intakeDeploySolenoid.set(Value.kReverse);
         //Timer.delay(1);
         //intakeDeploySolenoid.set(Value.kOff);
@@ -142,7 +139,7 @@ public class CatzIntake {
 
     //---------------------------------------------Autonomous pickup---------------------------------------------------
 
-    public void intakePowerCell()
+    /*public void intakePowerCell()
     {
         Robot.auton.driveStraightIntake(14, Robot.auton.MIN_FPS_VELOCITY, 500);
         if(Robot.indexer.ballPresent())
@@ -150,5 +147,5 @@ public class CatzIntake {
             intakeRollerOff();
         }
         
-    }
+    }*/
 }

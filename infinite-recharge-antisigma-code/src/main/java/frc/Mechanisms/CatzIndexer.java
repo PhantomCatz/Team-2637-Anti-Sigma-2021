@@ -161,6 +161,22 @@ public class CatzIndexer
         });      
         indexerThread.start(); //repeats thread
     }   // end of startIndexerThread()
+
+    public boolean ballPresent()
+    {
+        boolean ballPresent;
+        
+        if(indexerEntranceSwitchState == BALL_PRESENT)
+        {
+            ballPresent = true;
+        }
+        else
+        {
+            ballPresent = false;
+        }
+
+        return ballPresent;
+    }
     
     public void stopIndexerThread()
     {

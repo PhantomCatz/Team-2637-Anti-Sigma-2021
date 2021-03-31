@@ -8,6 +8,8 @@ package frc.robot;
 
 import java.util.ArrayList;
 
+import javax.lang.model.util.ElementScanner6;
+
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSink;
 import edu.wpi.cscore.VideoMode.PixelFormat;
@@ -58,9 +60,11 @@ public class Robot extends TimedRobot
   public static AHRS navx;
 
   // Xbox Controllers
-  public static XboxController xboxDrv;
+  private static XboxController xboxDrv;
+  public  static XboxController xboxAux;
 
   private final int XBOX_DRV_PORT = 0;
+  private final int XBOX_AUX_PORT = 1;
 
   public static PowerDistributionPanel pdp;
 
@@ -100,6 +104,7 @@ public class Robot extends TimedRobot
   public void robotInit() 
   {
     xboxDrv = new XboxController(XBOX_DRV_PORT);
+    xboxAux = new XboxController(XBOX_AUX_PORT);
 
     driveTrain = new CatzDriveTrain();
     intake     = new CatzIntake();
@@ -202,27 +207,25 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit() 
   {
-
     //driveTrain.shiftToHighGear();
     //auton.driveStraightIntake(10, 14, 1000); //change dist
-    
-    boolean pathA = true;
-    if(pathA)
-    {
-      intake.deployIntake();
-      
-      auton.driveStraight(100, 1000);
-      //intake.intakePowerCell();
-      
-      /*if(indexer.ballCount == 1)
-      {
-        auton.drivePathAPurple();
-      }
+   
+    //driveTrain.setTargetVelocity(4000);
+      /*
       else
       {
-        auton.drivePathAYellow();
-      }*/
-    }
+          auton.driveStraight(-999,auton.PATH_X_2B,5);
+          if(auton.firstBall == 3) //change num here later
+          {
+            auton.drivePathABlue();
+
+          }
+          else
+          {
+
+          }
+        }*/
+   
     /*
     else if(pathA == false)
     {
@@ -238,8 +241,7 @@ public class Robot extends TimedRobot
         auton.drivePathBYellow();
       }
     }*/
-    
-
+  
 
 
     //auton.PIDturn(180, 3, 0.45);
@@ -249,11 +251,28 @@ public class Robot extends TimedRobot
     dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_STRAIGHT);
     //dataCollection.setLogDataID(dataCollection.LOG_ID_DRV_TURN);
     dataCollection.startDataCollection();
+
+    intake.deployIntake();
+    System.out.println("Starting drive straight");
+    auton.driveStraight(-999.0, auton.PATH_X_1X, 5); //check timer
+    //auton.driveStraight(100, 2, 5);
+    //intake.intakePowerCell();
     
+    if(auton.firstBall == 60)
+    {
+      //auton.drivePathBRed();
+      System.out.println("DRIVE PATH B RED");
+    }
+    else if(auton.firstBall == 67)
+    {
+      //auton.drivePathARed();
+      System.out.println("DRIVE PATH A RED");
+    }
+  }
     //auton.run(0.5);
     
     //shooter.autonomousOn();
-  }
+  
 
   @Override
   public void autonomousPeriodic() 
@@ -270,7 +289,7 @@ public class Robot extends TimedRobot
   {
 
     driveTrain.instantiateDifferentialDrive();
-    driveTrain.setToBrakeMode();
+
     dataCollection.dataCollectionInit(dataArrayList);
     dataCollectionTimer.reset();
     dataCollectionTimer.start();
@@ -343,32 +362,32 @@ public class Robot extends TimedRobot
 
 
     //--------------------------------------------SHOOTER-------------------------------------------------
-    if(xboxDrv.getPOV() == DPAD_UP)
+    if(xboxAux.getPOV() == DPAD_UP)
     {
       shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_LO);
       //shooter.setTargetVelocity(.25);
     }
-    else if(xboxDrv.getPOV() == DPAD_LT)
+    else if(xboxAux.getPOV() == DPAD_LT)
     {
      shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_MD);
     }
-    else if(xboxDrv.getPOV() == DPAD_DN)
+    else if(xboxAux.getPOV() == DPAD_DN)
     {
       shooter.setTargetRPM(shooter.SHOOTER_TARGET_RPM_HI);
     }
-    else if(xboxDrv.getBButton())
+    else if(xboxAux.getBButton())
     {
       indexer.setShooterIsRunning(true);
       shooter.shoot();
     } 
-    else if(xboxDrv.getStartButton())
+    else if(xboxAux.getStartButton())
     {
       shooter.shooterOff();
       indexer.indexerStop();
     }
 
    //----------------------------------------------INDEXER----------------------------------------
-   if(xboxDrv.getBackButton())
+   if(xboxAux.getBackButton())
    {
     indexer.indexerReversedOn();
    } 

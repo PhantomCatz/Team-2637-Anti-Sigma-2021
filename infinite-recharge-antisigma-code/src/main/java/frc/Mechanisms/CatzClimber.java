@@ -142,7 +142,7 @@ public class CatzClimber
 
 
 
-/*    public void climbControl() 
+    public void climbControl() 
     {
         climbThread = new Thread(() -> //start of thread
         {
@@ -207,5 +207,5 @@ public class CatzClimber
             }
         });
         climbThread.start();
-    } */
+    }
 }

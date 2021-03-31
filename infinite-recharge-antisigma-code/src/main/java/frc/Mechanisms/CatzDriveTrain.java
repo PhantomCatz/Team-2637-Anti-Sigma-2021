@@ -24,8 +24,8 @@ public class CatzDriveTrain
     public final int DRVTRAIN_LT_FRNT_MC_CAN_ID = 1;//1;
     public final int DRVTRAIN_LT_BACK_MC_CAN_ID = 2;//2;
 
-    public final int DRVTRAIN_RT_FRNT_MC_CAN_ID = 3;//3;
-    public final int DRVTRAIN_RT_BACK_MC_CAN_ID = 4;//4;
+    public final int DRVTRAIN_RT_FRNT_MC_CAN_ID = 4;//3;
+    public final int DRVTRAIN_RT_BACK_MC_CAN_ID = 3;//4;
 
     public final int DRV_TRN_LT_FRNT_MC_PDP_PORT = 0;
     public final int DRV_TRN_LT_BACK_MC_PDP_PORT = 1;
@@ -261,11 +261,17 @@ public class CatzDriveTrain
 
     public void setTargetVelocity(double targetVelocity)
     {
-
+        System.out.println("In target velocity");
         double rightSetValue = -targetVelocity * DRIVE_STRAIGHT_PID_TUNING_CONSTANT;
         drvTrainMtrCtrlLTFrnt.set(TalonFXControlMode.Velocity, targetVelocity);
         drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.Velocity, rightSetValue);
         
+    }
+
+    public void setTurnInPlaceVelocity(double velocity) 
+    {
+        drvTrainMtrCtrlLTFrnt.set(TalonFXControlMode.Velocity, (velocity));
+        drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.Velocity, (velocity));  
     }
 
     public double getVelocityError(String side, double targetVelocity)
@@ -308,12 +314,5 @@ public class CatzDriveTrain
         drvTrainMtrCtrlRTFrnt.set(TalonFXControlMode.PercentOutput, (targetPower));  
     }
     
-    public void setToBrakeMode()
-    {
-        //Set MC's in brake mode
-        drvTrainMtrCtrlLTFrnt.setNeutralMode(NeutralMode.Brake); 
-        drvTrainMtrCtrlLTBack.setNeutralMode(NeutralMode.Brake);
-        drvTrainMtrCtrlRTFrnt.setNeutralMode(NeutralMode.Brake);
-        drvTrainMtrCtrlRTBack.setNeutralMode(NeutralMode.Brake);
-    }
+    
 }
